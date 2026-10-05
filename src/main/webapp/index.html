@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Каталог фильмов</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <header>
+            <h1>Каталог фильмов</h1>
+            <span>Лабораторная работа · вариант 53434963</span>
+        </header>
+        <div id="loginPanel">
+            <h2>Вход</h2>
+            <form id="loginForm">
+                <label>Логин<input name="login" required autocomplete="username" /></label
+                ><label
+                    >Пароль<input
+                        name="password"
+                        type="password"
+                        required
+                        autocomplete="current-password" /></label
+                ><button>Войти</button>
+                <p id="loginError" class="error" role="alert"></p>
+            </form>
+            <p>Локальная демонстрация: student1 или student2, пароль student123.</p>
+        </div>
+        <div id="app" hidden>
+            <nav>
+                <button data-view="movies">Фильмы</button
+                ><button data-view="references">Справочники</button
+                ><button data-view="special">Специальные операции</button><span id="who"></span
+                ><button id="logout">Выйти</button>
+            </nav>
+            <p id="status" role="status"></p>
+            <section id="moviesView">
+                <h2>Фильмы</h2>
+                <div class="toolbar">
+                    <button id="addMovie">Добавить фильм</button>
+                    <form id="findForm">
+                        <label
+                            >ID фильма
+                            <input name="id" type="number" min="1" step="1" required /></label
+                        ><button>Открыть</button>
+                    </form>
+                </div>
+                <form id="filterForm" class="toolbar">
+                    <label>Колонка<select id="filterColumn"></select></label
+                    ><label
+                        >Содержит<input id="filterText" placeholder="Любая часть строки" /></label
+                    ><label>Сортировать по<select id="sortColumn"></select></label
+                    ><label
+                        >Порядок<select id="sortDesc">
+                            <option value="false">По возрастанию</option>
+                            <option value="true">По убыванию</option>
+                        </select></label
+                    ><button>Применить</button
+                    ><button type="button" id="resetFilter">Сбросить</button>
+                </form>
+                <p class="muted">
+                    Каждый атрибут — отдельная колонка. Таблица прокручивается по горизонтали.
+                    Пустые значения обозначены «—».
+                </p>
+                <div id="movieTable" class="tableWrap"></div>
+                <div class="toolbar">
+                    <button id="prev">Назад</button><span id="pageInfo"></span
+                    ><button id="next">Вперёд</button
+                    ><label
+                        >На странице<select id="pageSize">
+                            <option>5</option>
+                            <option selected>10</option>
+                            <option>20</option>
+                        </select></label
+                    >
+                </div>
+            </section>
+            <section id="referencesView" hidden>
+                <h2>Справочники</h2>
+                <p>
+                    Сначала можно создать местоположение, затем человека и координаты. При создании
+                    фильма выбираются существующие записи.
+                </p>
+                <div class="toolbar">
+                    <label
+                        >Справочник<select id="referenceKind">
+                            <option value="persons">Люди</option>
+                            <option value="coordinates">Координаты</option>
+                            <option value="locations">Местоположения</option>
+                        </select></label
+                    ><button id="addReference">Добавить</button>
+                </div>
+                <div id="referenceTable" class="tableWrap"></div>
+            </section>
+            <section id="specialView" hidden>
+                <h2>Специальные операции</h2>
+                <p>Каждая операция выполняется функцией PostgreSQL через сервис приложения.</p>
+                <form id="specialForm">
+                    <label
+                        >Операция<select id="operation">
+                            <option value="tagline">Найти фильмы по подстроке слогана</option>
+                            <option value="delete-tagline">
+                                Удалить один фильм с точным слоганом
+                            </option>
+                            <option value="genre-less">
+                                Найти фильмы с жанром меньше заданного
+                            </option>
+                            <option value="writers">Сценаристы без «Оскаров»</option>
+                            <option value="redistribute">Перераспределить «Оскары»</option>
+                        </select></label
+                    >
+                    <label id="textField">Слоган / подстрока<input id="specialText" /></label
+                    ><label id="genreField" hidden
+                        >Жанр / жанр-донор<select id="sourceGenre"></select></label
+                    ><label id="targetField" hidden
+                        >Жанр-получатель<select id="targetGenre"></select></label
+                    ><button>Выполнить</button>
+                </form>
+                <p class="muted">
+                    Порядок жанров: ACTION &lt; WESTERN &lt; COMEDY &lt; FANTASY. Поиск слогана
+                    здесь учитывает регистр. Без наград = NULL. При переносе награды донора делятся
+                    поровну и прибавляются к наградам получателей; остаток — по ID.
+                </p>
+                <div id="specialResult" class="tableWrap"></div>
+            </section>
+        </div>
+        <dialog id="editor">
+            <h2 id="editorTitle"></h2>
+            <p id="editorWarning" class="error"></p>
+            <form id="editorForm">
+                <div id="editorFields" class="fields"></div>
+                <p id="editorError" class="error" role="alert"></p>
+                <div class="toolbar">
+                    <button id="saveButton">Сохранить</button
+                    ><button type="button" data-close="editor">Отмена</button>
+                </div>
+            </form>
+        </dialog>
+        <dialog id="detail">
+            <h2 id="detailTitle"></h2>
+            <div id="detailBody"></div>
+            <div class="toolbar">
+                <button id="editDetail">Изменить</button><button id="deleteDetail">Удалить</button
+                ><button data-close="detail">Закрыть</button>
+            </div>
+        </dialog>
+        <dialog id="confirmation">
+            <h2>Подтверждение удаления</h2>
+            <p id="confirmText"></p>
+            <p id="confirmError" class="error"></p>
+            <div class="toolbar">
+                <button id="confirmYes">Удалить</button
+                ><button data-close="confirmation">Отмена</button>
+            </div>
+        </dialog>
+        <script src="numeric-json.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>

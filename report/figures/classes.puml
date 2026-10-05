@@ -1,0 +1,81 @@
+@startuml
+!pragma layout smetana
+skinparam monochrome true
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+hide methods
+class Movie {
+ - id : long
+ - version : long
+ - name : String
+ - coordinates : Coordinates
+ - creationDate : LocalDate
+ - oscarsCount : Long
+ - budget : double
+ - totalBoxOffice : float
+ - mpaaRating : MpaaRating
+ - director : Person
+ - screenwriter : Person
+ - operator : Person
+ - length : Integer
+ - goldenPalmCount : Long
+ - tagline : String
+ - genre : MovieGenre
+}
+class Coordinates {
+ - id : long
+ - version : long
+ - x : Integer
+ - y : Float
+}
+class Person {
+ - id : long
+ - version : long
+ - name : String
+ - eyeColor : Color
+ - hairColor : Color
+ - location : Location
+ - height : Double
+ - nationality : Country
+}
+class Location {
+ - id : long
+ - version : long
+ - x : Integer
+ - y : Integer
+ - z : float
+ - name : String
+}
+enum MovieGenre {
+ ACTION
+ WESTERN
+ COMEDY
+ FANTASY
+}
+enum MpaaRating {
+ G
+ PG
+ R
+ NC_17
+}
+enum Color {
+ RED
+ YELLOW
+ WHITE
+}
+enum Country {
+ UNITED_KINGDOM
+ GERMANY
+ THAILAND
+ SOUTH_KOREA
+}
+Movie "0..*" --> "1" Coordinates
+Movie "0..*" --> "1" Person : director
+Movie "0..*" --> "0..1" Person : screenwriter
+Movie "0..*" --> "0..1" Person : operator
+Person "0..*" --> "0..1" Location
+Movie ..> MovieGenre
+Movie ..> MpaaRating
+Person ..> Color
+Person ..> Country
+@enduml

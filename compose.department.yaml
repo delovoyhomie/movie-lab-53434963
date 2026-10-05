@@ -1,0 +1,10 @@
+# Независимый compose: docker compose -f compose.department.yaml up --build
+services:
+  app:
+    build: .
+    environment:
+      DB_URL: ${DB_URL:?Set DB_URL in .env}
+      DB_USER: ${DB_USER:?Set DB_USER in .env}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:8080:8080"

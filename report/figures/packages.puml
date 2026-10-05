@@ -1,0 +1,21 @@
+@startuml
+!pragma layout smetana
+skinparam monochrome true
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontSize 15
+top to bottom direction
+package "web\nREST resources, AuthFilter, Errors" as web {}
+package "service\nMovieService, ReferenceService\nSpecialService, ValidationService, AuthService" as service {}
+package "repository\nMovieRepository, ReferenceRepository\nSpecialRepository" as repository {}
+package "model\nMovie, Person, Coordinates, Location, enums" as model {}
+package "dto\nMovieInput, ReferenceInput" as dto {}
+package "validation\nFinite, FiniteValidator" as validation {}
+web -down-> service
+service -down-> repository
+repository -down-> model
+model -down-> validation
+web ..> dto
+service ..> dto
+service ..> model
+@enduml

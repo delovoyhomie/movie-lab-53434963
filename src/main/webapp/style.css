@@ -1,0 +1,209 @@
+* {
+    box-sizing: border-box;
+}
+body {
+    font-family: Arial, sans-serif;
+    color: #222;
+    background: #fff;
+    margin: 0;
+    font-size: 15px;
+}
+header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #ccc;
+    background: #f4f4f4;
+}
+h1 {
+    font-size: 24px;
+    margin: 0 0 6px;
+}
+h2 {
+    font-size: 21px;
+}
+h3 {
+    font-size: 17px;
+}
+nav {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #ccc;
+    padding: 12px 24px;
+}
+#who {
+    margin-left: auto;
+}
+section,
+#loginPanel {
+    padding: 12px 24px;
+}
+#loginPanel {
+    max-width: 510px;
+}
+label {
+    display: block;
+    margin: 8px 0;
+}
+input,
+select,
+button {
+    font: inherit;
+    padding: 7px;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+}
+input,
+select {
+    display: block;
+    margin-top: 4px;
+    max-width: 100%;
+    width: 100%;
+}
+button {
+    cursor: pointer;
+    background: #eee;
+    color: #111;
+}
+button:hover {
+    background: #ddd;
+}
+button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid #305b8e;
+}
+nav button.active {
+    background: #dce7f3;
+}
+.toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: end;
+    flex-wrap: wrap;
+    margin: 10px 0;
+}
+.toolbar form {
+    display: flex;
+    gap: 8px;
+    align-items: end;
+}
+.toolbar input {
+    max-width: 230px;
+}
+.toolbar label {
+    margin: 0;
+}
+.tableWrap {
+    overflow: auto;
+    border: 1px solid #ddd;
+    margin: 12px 0;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+}
+th,
+td {
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid #ddd;
+    border-right: 1px solid #eee;
+    padding: 9px;
+    min-width: 90px;
+}
+th {
+    background: #f1f1f1;
+    white-space: nowrap;
+}
+td {
+    max-width: 280px;
+    overflow-wrap: anywhere;
+}
+td button {
+    margin: 2px;
+    padding: 5px;
+}
+.error {
+    color: #a31515;
+    white-space: pre-wrap;
+}
+.muted {
+    color: #555;
+    font-size: 13px;
+}
+#status {
+    padding: 0 24px;
+    color: #555;
+    min-height: 18px;
+}
+dialog {
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    max-width: 850px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: auto;
+    padding: 20px;
+}
+dialog::backdrop {
+    background: #0005;
+}
+.fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 20px;
+}
+dl {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 8px;
+}
+dt {
+    font-weight: bold;
+}
+dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+.nested {
+    border-left: 2px solid #ccc;
+    padding-left: 12px;
+    margin: 8px 0;
+}
+#specialForm {
+    max-width: 680px;
+}
+#specialResult {
+    max-height: 600px;
+}
+form button {
+    margin-top: 8px;
+}
+[hidden] {
+    display: none !important;
+}
+@media (max-width: 650px) {
+    .fields {
+        grid-template-columns: 1fr;
+    }
+    dl {
+        grid-template-columns: 1fr;
+    }
+    header,
+    section,
+    #loginPanel {
+        padding: 12px;
+    }
+    nav {
+        padding: 12px;
+    }
+    #who {
+        margin-left: 0;
+    }
+}

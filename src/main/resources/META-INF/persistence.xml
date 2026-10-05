@@ -1,0 +1,13 @@
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.1">
+    <persistence-unit name="movies" transaction-type="JTA">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <jta-data-source>java:jboss/datasources/MovieDS</jta-data-source>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <validation-mode>CALLBACK</validation-mode>
+        <properties>
+            <property name="hibernate.hbm2ddl.auto" value="validate" />
+            <property name="hibernate.cache.use_second_level_cache" value="false" />
+            <property name="hibernate.jdbc.time_zone" value="UTC" />
+        </properties>
+    </persistence-unit>
+</persistence>

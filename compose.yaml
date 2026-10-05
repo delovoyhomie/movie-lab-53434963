@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:16.4
+    environment:
+      POSTGRES_DB: movies
+      POSTGRES_USER: movies
+      POSTGRES_PASSWORD: movies_local
+    volumes:
+      - movie-data:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U movies -d movies"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  app:
+    build: .
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/movies
+      DB_USER: movies
+      DB_PASSWORD: movies_local
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  movie-data:

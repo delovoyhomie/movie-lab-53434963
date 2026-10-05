@@ -1,0 +1,4 @@
+embed-server --std-out=echo --server-config=standalone.xml
+/subsystem=datasources/jdbc-driver=postgresql:add(driver-name=postgresql,driver-module-name=org.postgresql,driver-class-name=org.postgresql.Driver)
+/subsystem=datasources/data-source=MovieDS:add(jndi-name=java:jboss/datasources/MovieDS,driver-name=postgresql,connection-url="${env.DB_URL:jdbc:postgresql://db:5432/movies}",user-name="${env.DB_USER:movies}",password="${env.DB_PASSWORD:movies_local}",min-pool-size=2,max-pool-size=10,enabled=true)
+stop-embedded-server

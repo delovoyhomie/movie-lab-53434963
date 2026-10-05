@@ -1,0 +1,12 @@
+dist/
+target/
+.env
+*.log
+.idea/
+*.iml
+__pycache__/
+.DS_Store
+report/*.aux
+report/*.out
+report/*.toc
+report/*.xdv
