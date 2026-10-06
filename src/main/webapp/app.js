@@ -99,7 +99,9 @@ async function api(path, method = "GET", body) {
         if (response.status === 401 && path !== "auth/login") {
             showLogin();
         }
-        throw new Error(data?.error || "Ошибка " + response.status);
+        const error = new Error(data?.error || "Ошибка " + response.status);
+        error.status = response.status;
+        throw error;
     }
     return data;
 }
@@ -370,21 +372,48 @@ async function openDetail(kind, id) {
         kind,
         id,
     };
+    const detail = state.detail;
     await updateDetail();
-    getElement("detail").showModal();
+    if (state.detail === detail) {
+        getElement("detail").showModal();
+    }
 }
 
 async function updateDetail() {
+    const detail = state.detail;
+    if (!detail || detail.deleted) {
+        return;
+    }
     try {
-        const { kind, id } = state.detail;
-        const data = await api(getEndpoint(kind, id));
-        state.detail.data = data;
+        const data = await api(getEndpoint(detail.kind, detail.id));
+        if (state.detail !== detail) {
+            return;
+        }
+        detail.data = data;
+        getElement("detailWarning").textContent = "";
+        getElement("editDetail").disabled = false;
+        getElement("deleteDetail").disabled = false;
         getElement("detailTitle").textContent =
-            (kind === "movies" ? "Фильм" : "Запись справочника") + " #" + id;
+            (detail.kind === "movies" ? "Фильм" : "Запись справочника") + " #" + detail.id;
         getElement("detailBody").replaceChildren(renderDetails(data));
     } catch (error) {
-        getElement("detail").close();
-        state.detail = null;
+        if (state.detail !== detail) {
+            return;
+        }
+        if (!detail.data) {
+            state.detail = null;
+            throw error;
+        }
+        getElement("editDetail").disabled = true;
+        getElement("deleteDetail").disabled = true;
+        if (error.status === 404) {
+            detail.deleted = true;
+            getElement("detailWarning").textContent =
+                "Объект удалён. Показаны последние загруженные данные.";
+            return;
+        }
+        getElement("detailWarning").textContent =
+            "Не удалось обновить карточку. Показаны последние загруженные данные.";
         throw error;
     }
 }
@@ -703,13 +732,13 @@ setInterval(async () => {
     try {
         const revision = (await api("movies/revision")).revision;
         if (revision !== state.revision) {
-            state.revision = revision;
             state.options = await api("references");
             if (getElement("editor").open) {
                 getElement("editorWarning").textContent =
                     "Данные в системе изменились. Ваш ввод сохранён. При конфликте сервер попросит заново открыть форму.";
             }
             await refresh();
+            state.revision = revision;
         }
         if (state.connectionError) {
             showStatus("Связь с сервером восстановлена · автообновление включено");
