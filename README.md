@@ -239,7 +239,79 @@ UML-диаграммы классов и пакетов разработанно
 
 Репозиторий должен быть публичным. Ветку можно не указывать — возьмётся основная.
 
-## Запуск
+## Запуск на Helios
+
+Приложение установлено в `~/movie-lab` на `helios.cs.ifmo.ru`, HTTP-порт — `40946`.
+PostgreSQL: `pg:5432`, база `studs`, схема `s409946`.
+Таблицы и SQL-функции этой работы имеют префикс `ml53434963_`: в схеме уже есть таблицы других работ.
+Пароль БД читается на сервере из `~/.pgpass`.
+
+Открыть SSH-туннель на своём компьютере и оставить терминал открытым:
+
+```sh
+ssh -p 2222 -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 \
+  -L 18081:127.0.0.1:40946 s409946@helios.cs.ifmo.ru
+```
+
+Адрес в браузере: http://127.0.0.1:18081/movie-lab/.
+Браузер обращается через SSH-туннель к приложению на Helios. Docker для этого не нужен.
+Если туннель уже открыт, второй раз эту команду выполнять не нужно.
+Вход в приложение: `student1` / `student123` или `student2` / `student123`.
+
+Если приложение остановлено, подключиться к Helios и запустить его
+(в другом терминале, отдельно от туннеля):
+
+```sh
+ssh -p 2222 s409946@helios.cs.ifmo.ru
+~/movie-lab/start.sh
+```
+
+Посмотреть логи на Helios:
+
+```sh
+tail -f ~/movie-lab/console.log
+```
+
+Остановить приложение на Helios, когда это потребуется:
+
+```sh
+~/movie-lab/stop.sh
+```
+
+`start.sh` запускает приложение в фоне. Закрытие SSH не останавливает его.
+После перезагрузки Helios нужно снова выполнить `start.sh`.
+Исходники установленной сборки: `~/movie-lab/helios-source`.
+
+### Запросы к API из терминала Helios
+
+```sh
+curl -i -c /tmp/movie-cookies.txt \
+  -H 'Content-Type: application/json' \
+  -d '{"login":"student1","password":"student123"}' \
+  http://127.0.0.1:40946/movie-lab/api/auth/login
+curl -i -b /tmp/movie-cookies.txt \
+  'http://127.0.0.1:40946/movie-lab/api/movies?page=0&size=5'
+```
+
+### Обновление приложения
+
+На своём компьютере из папки репозитория подготовить отдельную копию исходников с префиксом имён БД
+(путь назначения должен быть новым и находиться вне репозитория):
+
+```sh
+python3 deploy/helios/prepare.py ../movie-lab-helios
+cd ../movie-lab-helios
+mvn package
+scp -P 2222 target/movie-lab.war s409946@helios.cs.ifmo.ru:movie-lab/movie-lab.war
+ssh -p 2222 s409946@helios.cs.ifmo.ru
+~/movie-lab/stop.sh
+cp ~/movie-lab/movie-lab.war ~/movie-lab/wildfly-35.0.1.Final/standalone/deployments/
+~/movie-lab/start.sh
+```
+
+SQL-файлы с демоданными при обновлении повторно не запускать.
+
+## Локальный запуск через Docker
 
 Запустить Docker. В терминале из папки проекта:
 
@@ -261,7 +333,6 @@ docker compose down
 ```
 
 ## Структура проекта
-
 ```text
 src/main/java/ru/itmo/movielab/
   model/        сущности БД и перечисления
@@ -274,66 +345,9 @@ src/main/resources/META-INF/persistence.xml  настройки JPA
 src/main/webapp/  HTML, CSS, JavaScript
 db/             таблицы, SQL-функции и тестовые данные
 docker/         настройки WildFly и драйвера PostgreSQL
+deploy/helios/  подготовка сборки и скрипты запуска на Helios
 tests/          тесты
 report/         отчёт PDF, LaTeX и UML-диаграммы
-compose.yaml     запуск приложения и PostgreSQL
+compose.yaml     локальный запуск приложения и PostgreSQL
 pom.xml          зависимости и сборка Maven
 ```
-
-## Helios
-
-Приложение установлено в `~/movie-lab` на `helios.cs.ifmo.ru`, HTTP-порт — `40946`.
-PostgreSQL: `pg:5432`, база `studs`, схема `s409946`.
-Таблицы и SQL-функции этой работы имеют префикс `ml53434963_`: в схеме уже есть таблицы других работ.
-Пароль БД читается на сервере из `~/.pgpass`.
-
-Открыть SSH-туннель на своём компьютере и оставить терминал открытым:
-
-```sh
-ssh -p 2222 -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 \
-  -L 18081:127.0.0.1:40946 s409946@helios.cs.ifmo.ru
-```
-
-Адрес в браузере: http://127.0.0.1:18081/movie-lab/.
-Это доступ к приложению на Helios через туннель; локальный Docker не используется.
-Вход в приложение: `student1` / `student123` или `student2` / `student123`.
-
-Запуск, остановка и логи — после входа на Helios:
-
-```sh
-ssh -p 2222 s409946@helios.cs.ifmo.ru
-~/movie-lab/start.sh
-~/movie-lab/stop.sh
-tail -f ~/movie-lab/console.log
-```
-
-`start.sh` запускает приложение в фоне. Закрытие SSH не останавливает его.
-После перезагрузки Helios нужно снова выполнить `start.sh`.
-Исходники установленной сборки: `~/movie-lab/helios-source`.
-
-Проверка API прямо на Helios:
-
-```sh
-curl -i -c /tmp/movie-cookies.txt \
-  -H 'Content-Type: application/json' \
-  -d '{"login":"student1","password":"student123"}' \
-  http://127.0.0.1:40946/movie-lab/api/auth/login
-curl -i -b /tmp/movie-cookies.txt \
-  'http://127.0.0.1:40946/movie-lab/api/movies?page=0&size=5'
-```
-
-Для обновления приложения подготовить отдельную копию исходников с префиксом имён БД
-(путь назначения должен быть новым и находиться вне репозитория):
-
-```sh
-python3 deploy/helios/prepare.py ../movie-lab-helios
-cd ../movie-lab-helios
-mvn package
-scp -P 2222 target/movie-lab.war s409946@helios.cs.ifmo.ru:movie-lab/movie-lab.war
-ssh -p 2222 s409946@helios.cs.ifmo.ru
-~/movie-lab/stop.sh
-cp ~/movie-lab/movie-lab.war ~/movie-lab/wildfly-35.0.1.Final/standalone/deployments/
-~/movie-lab/start.sh
-```
-
-SQL-файлы с демоданными при обновлении повторно не запускать.
