@@ -106,6 +106,7 @@ async function api(path, method = "GET", body) {
 
 function showStatus(text) {
     getElement("status").textContent = text;
+    getElement("status").hidden = !text;
 }
 
 function showLogin() {
@@ -125,7 +126,7 @@ async function showApplication(user) {
     state.options = await api("references");
     state.revision = (await api("movies/revision")).revision;
     await refresh();
-    showStatus("Автообновление включено · проверка каждые 2 секунды");
+    showStatus("");
 }
 
 getElement("loginForm").onsubmit = async (event) => {
@@ -782,7 +783,7 @@ setInterval(async () => {
             state.revision = revision;
         }
         if (state.connectionError) {
-            showStatus("Связь с сервером восстановлена · автообновление включено");
+            showStatus("");
             state.connectionError = false;
         }
     } catch (error) {
