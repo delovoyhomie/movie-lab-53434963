@@ -49,7 +49,7 @@
                 <form id="filterForm" class="toolbar">
                     <label>Искать по<select id="filterColumn"></select></label
                     ><label
-                        ><span id="filterValueLabel">Содержит</span><input id="filterText" aria-describedby="filterHint" /></label
+                        ><span id="filterValueLabel">Содержит</span><input id="filterText" /></label
                     ><label>Сортировать по<select id="sortColumn"></select></label
                     ><label
                         >Порядок<select id="sortDesc">
@@ -59,12 +59,7 @@
                     ><button>Применить</button
                     ><button type="button" id="resetFilter">Сбросить</button>
                 </form>
-                <p id="filterHint" class="muted"></p>
                 <p id="filterError" class="error" role="alert"></p>
-                <p id="filterSummary" class="muted" role="status"></p>
-                <p class="muted">
-                    Таблицу можно прокручивать вправо. Пустые значения обозначены «—».
-                </p>
                 <div id="movieTable" class="tableWrap"></div>
                 <div class="toolbar">
                     <button id="prev">Назад</button><span id="pageInfo"></span
@@ -159,6 +154,6 @@
             </div>
         </dialog>
         <script src="numeric-json.js"></script>
-        <script src="app.js"></script>
+        <script src="app.js?v=20261103-2"></script>
     </body>
 </html>

@@ -159,9 +159,6 @@ function updateFilterInput() {
     input.inputMode = isText || column === "creationDate" ? "text" : "decimal";
     input.placeholder = isText ? "Часть текста" : "Точное значение";
     getElement("filterValueLabel").textContent = isText ? "Содержит" : "Равно";
-    getElement("filterHint").textContent = isText
-        ? "Поиск по части строки, без учёта регистра. Пустое поле — все фильмы."
-        : "Поиск по точному значению. Пустое поле — все фильмы.";
 }
 getElement("filterColumn").onchange = () => {
     getElement("filterText").value = "";
@@ -280,11 +277,6 @@ async function loadMovies() {
     }
     state.page = data.page;
     renderTable(getElement("movieTable"), data.items, columns, "movies");
-    const fieldName = (key) => filterColumns.find(([name]) => name === key)[1];
-    const filterDescription = filters.q
-        ? `${fieldName(filters.column)} ${textColumns.includes(filters.column) ? "содержит" : "="} «${filters.q}»`
-        : "Без фильтра";
-    getElement("filterSummary").textContent = `${filterDescription} · сортировка: ${fieldName(filters.sort)}, ${filters.desc === "true" ? "по убыванию" : "по возрастанию"}`;
     getElement("pageInfo").textContent =
         `Страница ${data.page + 1} из ${Math.max(1, Math.ceil(data.total / state.size))} · всего ${data.total}`;
     getElement("prev").disabled = state.page === 0;
