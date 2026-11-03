@@ -249,8 +249,7 @@ PostgreSQL: `pg:5432`, база `studs`, схема `s409946`.
 Открыть SSH-туннель на своём компьютере и оставить терминал открытым:
 
 ```sh
-ssh -p 2222 -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 \
-  -L 18081:127.0.0.1:40946 s409946@helios.cs.ifmo.ru
+ssh -p 2222 -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -L 18081:127.0.0.1:40946 s409946@helios.cs.ifmo.ru
 ```
 
 Адрес в браузере: http://127.0.0.1:18081/movie-lab/.
@@ -282,16 +281,67 @@ tail -f ~/movie-lab/console.log
 После перезагрузки Helios нужно снова выполнить `start.sh`.
 Исходники установленной сборки: `~/movie-lab/helios-source`.
 
-### Запросы к API из терминала Helios
+### Запросы с Mac, без входа в терминал Helios
+
+На Mac используется порт `18081` — он перенаправляется туннелем на порт `40946` на Helios.
+Если туннеля ещё нет, открыть его командой выше. После ввода SSH-пароля терминал
+будет ждать без вывода — это нормально. Оставить его открытым, а `curl` выполнять
+в другом окне терминала на Mac.
+
+Сначала войти в приложение и сохранить сессию:
 
 ```sh
-curl -i -c /tmp/movie-cookies.txt \
-  -H 'Content-Type: application/json' \
-  -d '{"login":"student1","password":"student123"}' \
-  http://127.0.0.1:40946/movie-lab/api/auth/login
-curl -i -b /tmp/movie-cookies.txt \
-  'http://127.0.0.1:40946/movie-lab/api/movies?page=0&size=5'
+curl -i -c /tmp/movie-cookies.txt -H 'Content-Type: application/json' -d '{"login":"student1","password":"student123"}' http://127.0.0.1:18081/movie-lab/api/auth/login
 ```
+
+Получить первые пять фильмов:
+
+```sh
+curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:18081/movie-lab/api/movies?page=0&size=5'
+```
+
+Сортировать фильмы по бюджету от большего к меньшему:
+
+```sh
+curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:18081/movie-lab/api/movies?sort=budget&desc=true&size=5'
+```
+
+Найти фильмы с длительностью 92 минуты:
+
+```sh
+curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:18081/movie-lab/api/movies?column=length&q=92'
+```
+
+### Запросы, когда уже подключён по SSH к Helios
+
+Если приглашение терминала выглядит как `[s409946@helios ~]$`, команды выполняются
+на сервере. Здесь используется порт `40946`, туннель для этих запросов не нужен.
+Если ещё не подключён к серверу:
+
+```sh
+ssh -p 2222 s409946@helios.cs.ifmo.ru
+```
+
+В терминале Helios войти в приложение, затем запросить список:
+
+```sh
+curl -i -c /tmp/movie-cookies.txt -H 'Content-Type: application/json' -d '{"login":"student1","password":"student123"}' http://127.0.0.1:40946/movie-lab/api/auth/login
+curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:40946/movie-lab/api/movies?page=0&size=5'
+```
+
+Пример фильтра и сортировки: фильмы жанра COMEDY, по бюджету от меньшего к большему.
+
+```sh
+curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:40946/movie-lab/api/movies?column=genre&q=COMEDY&sort=budget&desc=false'
+```
+
+`-i` показывает HTTP-статус и заголовки, `-c` сохраняет сессию, `-b` передаёт её
+следующим запросам. Файл `/tmp/movie-cookies.txt` на Mac и на Helios — это два разных файла.
+Вход через SSH и вход в приложение — отдельные действия; сессия браузера тоже не передаётся в `curl`.
+
+`401 Unauthorized` — нужно снова выполнить запрос входа в приложение.
+`Failed to connect` — проверить порт, туннель и запуск приложения.
+На Mac обращаться к `40946` не нужно: это порт приложения внутри Helios.
 
 ### Обновление приложения
 
