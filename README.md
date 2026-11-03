@@ -306,10 +306,10 @@ curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:18081/movie-lab/api/movies?p
 curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:18081/movie-lab/api/movies?sort=budget&desc=true&size=5'
 ```
 
-Найти фильмы с длительностью 92 минуты:
+Найти фильмы с длительностью 137 минут:
 
 ```sh
-curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:18081/movie-lab/api/movies?column=length&q=92'
+curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:18081/movie-lab/api/movies?column=length&q=137'
 ```
 
 ### Запросы, когда уже подключён по SSH к Helios
@@ -384,9 +384,55 @@ docker compose down
 
 ## Данные и поиск
 
-`db/003_demo_data.sql` заполняет базу 12 вымышленными фильмами и связанными записями.
-Они нужны для проверки пагинации, поиска по слогану и операций с наградами.
-Это начальные данные: дальше фильмы создаются и изменяются через приложение.
+`db/003_demo_data.sql` заполняет каталог 12 реальными фильмами и их авторами.
+Название на русском и год указаны в одном поле. Бюджет, мировые сборы, длительность,
+рейтинг и имена авторов взяты из The Numbers. Значения зафиксированы 03.11.2026;
+учитываются сведения о повторных прокатах, доступные в источнике.
+
+| Фильм | Источник |
+| --- | --- |
+| Терминатор 2: Судный день (1991) | [The Numbers](https://www.the-numbers.com/movie/Terminator-2-Judgment-Day-(1991)) |
+| Крепкий орешек (1988) | [The Numbers](https://www.the-numbers.com/movie/Die-Hard-(1988)) |
+| Безумный Макс: Дорога ярости (2015) | [The Numbers](https://www.the-numbers.com/movie/Mad-Max-Fury-Road) |
+| Непрощённый (1992) | [The Numbers](https://www.the-numbers.com/movie/Unforgiven) |
+| Джанго освобождённый (2012) | [The Numbers](https://www.the-numbers.com/movie/Django-Unchained) |
+| Омерзительная восьмёрка (2015) | [The Numbers](https://www.the-numbers.com/movie/Hateful-Eight-The) |
+| Один дома (1990) | [The Numbers](https://www.the-numbers.com/movie/home-alone) |
+| Шоу Трумана (1998) | [The Numbers](https://www.the-numbers.com/movie/Truman-Show-The-(1998)) |
+| Назад в будущее (1985) | [The Numbers](https://www.the-numbers.com/movie/Back-to-the-Future-(1985)) |
+| Гарри Поттер и философский камень (2001) | [The Numbers](https://www.the-numbers.com/movie/Harry-Potter-and-the-Sorcerers-Stone-(2001)) |
+| Волшебник страны Оз (1939) | [The Numbers](https://www.the-numbers.com/movie/Wizard-of-Oz-The-(1939)) |
+| Лабиринт Фавна (2006) | [The Numbers](https://www.the-numbers.com/movie/Laberinto-del-Fauno-El-(2006)) |
+
+Количество «Оскаров» — победы фильма, а не номинации: церемонии
+[1940](https://www.oscars.org/oscars/ceremonies/1940),
+[1986](https://www.oscars.org/oscars/ceremonies/1986),
+[1992](https://www.oscars.org/oscars/ceremonies/1992),
+[1993](https://www.oscars.org/oscars/ceremonies/1993),
+[2007](https://www.oscars.org/oscars/ceremonies/2007),
+[2013](https://www.oscars.org/oscars/ceremonies/2013),
+[2016](https://www.oscars.org/oscars/ceremonies/2016).
+Без наград хранится `NULL`, поскольку по заданию число наград должно быть положительным.
+
+Слоганы оставлены на английском: например, [постер «Терминатора 2»](https://www.impawards.com/1991/terminator_two_judgement_day.html),
+[слоганы «Один дома»](https://www.imdb.com/title/tt0099785/taglines/),
+[«Безумного Макса»](https://www.imdb.com/title/tt1392190/taglines/),
+[«Лабиринта Фавна»](https://www.imdb.com/title/tt0457430/taglines/),
+[постер «Шоу Трумана»](https://www.bdcmuseum.org.uk/explore/item/101404/),
+[«Гарри Поттер» в AFI](https://silver.afi.com/movies/detail/0100000777/).
+Если слоган не добавлен, поле остаётся пустым.
+
+Ограничения модели из варианта:
+
+- Бюджет и сборы — доллары США, длительность — минуты. Поле сборов имеет тип `float`, поэтому возможны округления больших сумм.
+- Дата добавления создаётся сервером и не означает дату выхода фильма.
+- Координаты — условные значения для модели задания, не география съёмок.
+- Указан один из авторов сценария: поле не позволяет хранить нескольких. Жанр выбран из четырёх значений варианта; для смешанных жанров указан один подходящий.
+- Имена людей реальны; обязательные цвета глаз/волос (`WHITE`) и рост (180) — условные значения. Допустимые цвета только `RED`, `YELLOW`, `WHITE` не позволяют описать реальные внешние данные. Гражданство и местоположение не заполнены.
+- Для «Волшебника страны Оз» указан рейтинг `G` из переиздания 1970 года, приведённый в источнике.
+
+Скрипт также заменяет старые неизменённые записи «Учебный фильм N», сохраняя их ID
+и даты добавления. Существующие реальные фильмы и изменённые пользователем записи не перезаписываются.
 
 Поиск по текстовым полям работает по части строки без учёта регистра,
 по числам и дате — по точному значению. Для координат можно выбрать ID, X или Y.

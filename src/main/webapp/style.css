@@ -126,6 +126,16 @@ td {
     max-width: 280px;
     overflow-wrap: anywhere;
 }
+#movieTable td:nth-child(2) {
+    min-width: 220px;
+    overflow-wrap: break-word;
+}
+#movieTable td:nth-child(9),
+#movieTable td:nth-child(10),
+#movieTable td:nth-child(11) {
+    min-width: 150px;
+    overflow-wrap: break-word;
+}
 td button {
     margin: 2px;
     padding: 5px;
