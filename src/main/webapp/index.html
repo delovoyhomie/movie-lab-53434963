@@ -24,7 +24,7 @@
                 ><button>Войти</button>
                 <p id="loginError" class="error" role="alert"></p>
             </form>
-            <p>Локальная демонстрация: student1 или student2, пароль student123.</p>
+            <p>Учебные пользователи: student1 или student2, пароль student123.</p>
         </div>
         <div id="app" hidden>
             <nav>
@@ -36,6 +36,7 @@
             <p id="status" role="status"></p>
             <section id="moviesView">
                 <h2>Фильмы</h2>
+                <p class="muted">Начальные записи «Учебный фильм» — вымышленные данные для проверки работы системы.</p>
                 <div class="toolbar">
                     <button id="addMovie">Добавить фильм</button>
                     <form id="findForm">
@@ -46,9 +47,9 @@
                     </form>
                 </div>
                 <form id="filterForm" class="toolbar">
-                    <label>Колонка<select id="filterColumn"></select></label
+                    <label>Искать по<select id="filterColumn"></select></label
                     ><label
-                        >Содержит<input id="filterText" placeholder="Любая часть строки" /></label
+                        ><span id="filterValueLabel">Содержит</span><input id="filterText" aria-describedby="filterHint" /></label
                     ><label>Сортировать по<select id="sortColumn"></select></label
                     ><label
                         >Порядок<select id="sortDesc">
@@ -58,9 +59,11 @@
                     ><button>Применить</button
                     ><button type="button" id="resetFilter">Сбросить</button>
                 </form>
+                <p id="filterHint" class="muted"></p>
+                <p id="filterError" class="error" role="alert"></p>
+                <p id="filterSummary" class="muted" role="status"></p>
                 <p class="muted">
-                    Каждый атрибут — отдельная колонка. Таблица прокручивается по горизонтали.
-                    Пустые значения обозначены «—».
+                    Таблицу можно прокручивать вправо. Пустые значения обозначены «—».
                 </p>
                 <div id="movieTable" class="tableWrap"></div>
                 <div class="toolbar">
@@ -126,6 +129,7 @@
         </div>
         <dialog id="editor">
             <h2 id="editorTitle"></h2>
+            <p class="muted">* — обязательные поля. Остальные можно оставить пустыми.</p>
             <p id="editorWarning" class="error"></p>
             <form id="editorForm">
                 <div id="editorFields" class="fields"></div>

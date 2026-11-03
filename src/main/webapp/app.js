@@ -13,6 +13,7 @@ const state = {
     detail: null,
     special: null,
     connectionError: false,
+    filters: { column: "name", q: "", sort: "id", desc: "false" },
 };
 const columns = [
     ["id", "ID"],
@@ -26,20 +27,17 @@ const columns = [
     ["director", "Режиссёр"],
     ["screenwriter", "Сценарист"],
     ["operator", "Оператор"],
-    ["length", "Длительность"],
+    ["length", "Длительность, мин"],
     ["goldenPalmCount", "Золотые пальмы"],
     ["tagline", "Слоган"],
     ["genre", "Жанр"],
 ];
-const stringColumns = [
-    ["name", "Название"],
-    ["tagline", "Слоган"],
-    ["genre", "Жанр"],
-    ["mpaaRating", "MPAA"],
-    ["director", "Режиссёр"],
-    ["screenwriter", "Сценарист"],
-    ["operator", "Оператор"],
-];
+const filterColumns = columns.flatMap(([key, label]) =>
+    key === "coordinates"
+        ? [[key, "Координаты: ID"], ["coordinatesX", "Координаты: X"], ["coordinatesY", "Координаты: Y"]]
+        : [[key, label]],
+);
+const textColumns = ["name", "tagline", "genre", "mpaaRating", "director", "screenwriter", "operator"];
 const labels = Object.fromEntries([
     ...columns,
     ["version", "Версия"],
@@ -149,8 +147,27 @@ getElement("logout").onclick = async () => {
         showStatus(error.message);
     }
 };
-fillOptions(getElement("filterColumn"), stringColumns);
-fillOptions(getElement("sortColumn"), [["id", "ID"], ...stringColumns]);
+fillOptions(getElement("filterColumn"), filterColumns);
+getElement("filterColumn").value = "name";
+fillOptions(getElement("sortColumn"), filterColumns);
+
+function updateFilterInput() {
+    const column = getElement("filterColumn").value;
+    const input = getElement("filterText");
+    const isText = textColumns.includes(column);
+    input.type = column === "creationDate" ? "date" : "text";
+    input.inputMode = isText || column === "creationDate" ? "text" : "decimal";
+    input.placeholder = isText ? "Часть текста" : "Точное значение";
+    getElement("filterValueLabel").textContent = isText ? "Содержит" : "Равно";
+    getElement("filterHint").textContent = isText
+        ? "Поиск по части строки, без учёта регистра. Пустое поле — все фильмы."
+        : "Поиск по точному значению. Пустое поле — все фильмы.";
+}
+getElement("filterColumn").onchange = () => {
+    getElement("filterText").value = "";
+    updateFilterInput();
+};
+updateFilterInput();
 fillOptions(
     getElement("sourceGenre"),
     ["ACTION", "WESTERN", "COMEDY", "FANTASY"].map((x) => [x, x]),
@@ -219,7 +236,9 @@ function renderTable(container, items, tableColumns, kind) {
     for (const [, label] of tableColumns) {
         headerRow.append(createElement("th", label));
     }
-    headerRow.append(createElement("th", "Действия"));
+    const actionHeader = createElement("th", "Действия");
+    actionHeader.className = "actions";
+    headerRow.append(actionHeader);
     const thead = createElement("thead");
     thead.append(headerRow);
     tableElement.append(thead);
@@ -230,6 +249,7 @@ function renderTable(container, items, tableColumns, kind) {
             row.append(createElement("td", formatValue(item[key])));
         }
         const actions = createElement("td");
+        actions.className = "actions";
         for (const [label, action] of [
             ["Открыть", () => openDetail(kind, item.id)],
             ["Изменить", () => openEditor(kind, item.id)],
@@ -245,18 +265,26 @@ function renderTable(container, items, tableColumns, kind) {
     container.append(tableElement);
 }
 
+let movieRequest = 0;
 async function loadMovies() {
+    const request = ++movieRequest;
+    const filters = { ...state.filters };
     const params = new URLSearchParams({
         page: state.page,
         size: state.size,
-        column: getElement("filterColumn").value,
-        q: getElement("filterText").value,
-        sort: getElement("sortColumn").value,
-        desc: getElement("sortDesc").value,
+        ...filters,
     });
     const data = await api("movies?" + params);
+    if (request !== movieRequest) {
+        return;
+    }
     state.page = data.page;
     renderTable(getElement("movieTable"), data.items, columns, "movies");
+    const fieldName = (key) => filterColumns.find(([name]) => name === key)[1];
+    const filterDescription = filters.q
+        ? `${fieldName(filters.column)} ${textColumns.includes(filters.column) ? "содержит" : "="} «${filters.q}»`
+        : "Без фильтра";
+    getElement("filterSummary").textContent = `${filterDescription} · сортировка: ${fieldName(filters.sort)}, ${filters.desc === "true" ? "по убыванию" : "по возрастанию"}`;
     getElement("pageInfo").textContent =
         `Страница ${data.page + 1} из ${Math.max(1, Math.ceil(data.total / state.size))} · всего ${data.total}`;
     getElement("prev").disabled = state.page === 0;
@@ -311,16 +339,37 @@ async function refresh() {
     }
 }
 
-getElement("filterForm").onsubmit = (event) => {
+getElement("filterForm").onsubmit = async (event) => {
     event.preventDefault();
+    const previous = state.filters;
+    const previousPage = state.page;
+    const filters = {
+        column: getElement("filterColumn").value,
+        q: getElement("filterText").value,
+        sort: getElement("sortColumn").value,
+        desc: getElement("sortDesc").value,
+    };
+    state.filters = filters;
     state.page = 0;
-    loadMovies().catch((error) => showStatus(error.message));
+    getElement("filterError").textContent = "";
+    try {
+        await loadMovies();
+    } catch (error) {
+        if (state.filters === filters) {
+            state.filters = previous;
+            state.page = previousPage;
+            getElement("filterError").textContent = error.message;
+        }
+    }
 };
 getElement("resetFilter").onclick = () => {
     getElement("filterText").value = "";
     getElement("filterColumn").value = "name";
     getElement("sortColumn").value = "id";
     getElement("sortDesc").value = "false";
+    state.filters = { column: "name", q: "", sort: "id", desc: "false" };
+    getElement("filterError").textContent = "";
+    updateFilterInput();
     state.page = 0;
     loadMovies().catch((error) => showStatus(error.message));
 };
@@ -494,7 +543,7 @@ function getFields(kind) {
         return [
             textField("name", "Название", true),
             selectField("coordinatesId", "Координаты", referenceOptions("coordinates"), true),
-            numberField("oscarsCount", "Оскары (пусто = нет)", "", 1, 1),
+            numberField("oscarsCount", "Оскары (если есть)", false, 1, 1),
             numberField("budget", "Бюджет", true, "any", Number.MIN_VALUE),
             numberField("totalBoxOffice", "Кассовые сборы", true, "any", Number.MIN_VALUE),
             selectField("mpaaRating", "Рейтинг MPAA", enumOptions("ratings"), true),
@@ -503,7 +552,7 @@ function getFields(kind) {
             selectField("operatorId", "Оператор", referenceOptions("persons")),
             numberField("length", "Длительность, мин", true, 1, 1, 2147483647),
             numberField("goldenPalmCount", "Золотые пальмы", false, 1, 1),
-            textField("tagline", "Слоган (пусто = NULL)"),
+            textField("tagline", "Слоган"),
             selectField("genre", "Жанр", enumOptions("genres")),
         ];
     }

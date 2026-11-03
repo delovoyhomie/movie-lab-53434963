@@ -99,6 +99,7 @@ nav button.active {
     margin: 0;
 }
 .tableWrap {
+    position: relative;
     overflow: auto;
     border: 1px solid #ddd;
     margin: 12px 0;
@@ -128,6 +129,23 @@ td {
 td button {
     margin: 2px;
     padding: 5px;
+}
+.actions {
+    position: sticky;
+    right: 0;
+    min-width: 190px;
+    white-space: nowrap;
+    background: #fff;
+    box-shadow: -2px 0 3px #0001;
+}
+th.actions {
+    background: #f1f1f1;
+}
+tbody tr:hover td {
+    background: #f7f9fb;
+}
+.tableWrap > p {
+    padding: 0 12px;
 }
 .error {
     color: #a31515;
