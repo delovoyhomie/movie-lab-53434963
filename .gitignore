@@ -10,3 +10,4 @@ report/*.aux
 report/*.out
 report/*.toc
 report/*.xdv
+report/*.synctex.gz
