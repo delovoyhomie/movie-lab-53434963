@@ -1,0 +1,48 @@
+\begin{tikzpicture}[
+  x=1mm,y=-1mm,
+  package/.style={draw=black!65,line width=0.4pt,anchor=north west,
+    align=center,inner sep=5pt,font=\sffamily\fontsize{10}{12.5}\selectfont},
+  tab/.style={draw=black!65,fill=black!4,line width=0.4pt,
+    anchor=south west,inner sep=3pt,font=\sffamily\fontsize{10.5}{12}\selectfont},
+  dependency/.style={dashed,-{Straight Barb[length=2mm,width=1.6mm]},line width=0.45pt}
+]
+\node[package,text width=76mm] (web) at (41,5) {
+  MovieResource, ReferenceResource\\
+  SpecialResource, AuthResource\\
+  AuthFilter, Errors, ApiApplication
+};
+\node[tab] at (web.north west) {\textbf{web}};
+\node[package,text width=76mm] (service) at (41,45) {
+  MovieService, ReferenceService\\
+  SpecialService, ValidationService\\
+  AuthService, AppException
+};
+\node[tab] at (service.north west) {\textbf{service}};
+\node[package,text width=70mm] (repository) at (0,94) {
+  MovieRepository\\ReferenceRepository\\SpecialRepository
+};
+\node[tab] at (repository.north west) {\textbf{repository}};
+\node[package,text width=51mm] (dto) at (108,94) {
+  MovieInput\\ReferenceInput
+};
+\node[tab] at (dto.north west) {\textbf{dto}};
+\node[package,text width=70mm] (model) at (0,145) {
+  Movie, Coordinates\\Person, Location\\Перечисления
+};
+\node[tab] at (model.north west) {\textbf{model}};
+\node[package,text width=51mm] (validation) at (108,145) {
+  Finite, FiniteValidator\\
+  ExactLongDeserializer\\
+  ExactIntegerDeserializer
+};
+\node[tab] at (validation.north west) {\textbf{validation}};
+
+\draw[dependency] (web.south) -- (service.north);
+\draw[dependency] (service.south west) -- (repository.north);
+\draw[dependency] (service.south east) -- (dto.north);
+\draw[dependency] (repository.south) -- (model.north);
+\draw[dependency] (model.east) -- (validation.west);
+\draw[dependency] (dto.south) -- (validation.north);
+\draw[dependency] (web.east) -- (164,16) -- (164,79) -- (dto.north east);
+\draw[dependency] (service.south) -- (88,83) -- (88,158) -- (model.east);
+\end{tikzpicture}

@@ -1,0 +1,98 @@
+\begin{tikzpicture}[
+  x=1mm,y=-1mm,
+  class/.style={draw=black!65,line width=0.4pt,rectangle split,
+    rectangle split parts=2,rectangle split part align={center,left},
+    rectangle split part fill={black!4,white},anchor=north west,
+    inner sep=3pt,font=\sffamily\fontsize{10.5}{12.5}\selectfont},
+  enumeration/.style={class,text width=35mm,font=\sffamily\fontsize{9}{11}\selectfont},
+  relation/.style={-{Straight Barb[length=2mm,width=1.6mm]},line width=0.45pt},
+  note/.style={font=\sffamily\fontsize{9}{11}\selectfont,fill=white,inner sep=1pt}
+]
+\node[class,text width=58mm] (movie) at (0,40) {
+  \textbf{Movie}
+  \nodepart{second}
+  - id : long\\
+  - version : long\\
+  - name : String\\
+  - coordinates : Coordinates\\
+  - creationDate : LocalDate\\
+  - oscarsCount : Long\\
+  - budget : double\\
+  - totalBoxOffice : float\\
+  - mpaaRating : MpaaRating\\
+  - director : Person\\
+  - screenwriter : Person\\
+  - operator : Person\\
+  - length : Integer\\
+  - goldenPalmCount : Long\\
+  - tagline : String\\
+  - genre : MovieGenre
+};
+\node[class,text width=52mm] (coordinates) at (107,0) {
+  \textbf{Coordinates}
+  \nodepart{second}
+  - id : long\\
+  - version : long\\
+  - x : Integer\\
+  - y : Float
+};
+\node[class,text width=52mm] (person) at (107,62) {
+  \textbf{Person}
+  \nodepart{second}
+  - id : long\\
+  - version : long\\
+  - name : String\\
+  - eyeColor : Color\\
+  - hairColor : Color\\
+  - location : Location\\
+  - height : Double\\
+  - nationality : Country
+};
+\node[class,text width=52mm] (location) at (107,132) {
+  \textbf{Location}
+  \nodepart{second}
+  - id : long\\
+  - version : long\\
+  - x : Integer\\
+  - y : Integer\\
+  - z : float\\
+  - name : String
+};
+\draw[relation] (movie.north) |- (coordinates.west);
+\node[note] at (67,9) {coordinates};
+\node[note] at (35,34) {0..*};
+\node[note] at (102,22) {1};
+\draw[relation] (movie.east |- {0,75}) -- (person.west |- {0,75})
+  node[note,midway,above=2pt] {director}
+  node[note,pos=0.07,below=2pt] {0..*}
+  node[note,pos=0.94,below=2pt] {1};
+\draw[relation] (movie.east |- {0,87}) -- (person.west |- {0,87})
+  node[note,midway,above=2pt] {screenwriter}
+  node[note,pos=0.07,below=2pt] {0..*}
+  node[note,pos=0.89,below=2pt] {0..1};
+\draw[relation] (movie.east |- {0,99}) -- (person.west |- {0,99})
+  node[note,midway,above=2pt] {operator}
+  node[note,pos=0.07,below=2pt] {0..*}
+  node[note,pos=0.89,below=2pt] {0..1};
+\draw[relation] (person.south) -- (location.north)
+  node[note,midway,left=2pt] {location}
+  node[note,pos=0.15,right=2pt] {0..*}
+  node[note,pos=0.86,right=2pt] {0..1};
+
+\node[enumeration] at (0,181) {
+  \textbf{\guillemotleft enum\guillemotright\ MovieGenre}
+  \nodepart{second} ACTION\\WESTERN\\COMEDY\\FANTASY
+};
+\node[enumeration] at (42,181) {
+  \textbf{\guillemotleft enum\guillemotright\ MpaaRating}
+  \nodepart{second} G\\PG\\R\\NC\_17
+};
+\node[enumeration] at (84,181) {
+  \textbf{\guillemotleft enum\guillemotright\ Color}
+  \nodepart{second} RED\\YELLOW\\WHITE
+};
+\node[enumeration] at (126,181) {
+  \textbf{\guillemotleft enum\guillemotright\ Country}
+  \nodepart{second} UNITED\_KINGDOM\\GERMANY\\THAILAND\\SOUTH\_KOREA
+};
+\end{tikzpicture}
