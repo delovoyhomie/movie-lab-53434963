@@ -5,7 +5,6 @@
 from smoke import Client
 
 c = Client()
-c.login("student1")
 old = c.call("movies?size=100")["items"]
 donors = [m for m in old if m["genre"] == "ACTION"]
 targets = sorted([m for m in old if m["genre"] == "COMEDY"], key=lambda m: m["id"])

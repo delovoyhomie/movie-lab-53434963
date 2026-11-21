@@ -11,12 +11,6 @@ INSERT INTO
 VALUES
     (1, 0);
 
-CREATE TABLE app_users (
-    login text PRIMARY KEY,
-    salt text NOT NULL,
-    password_hash text NOT NULL
-);
-
 CREATE TABLE coordinates (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY CHECK (id > 0),
     version bigint NOT NULL DEFAULT 0,

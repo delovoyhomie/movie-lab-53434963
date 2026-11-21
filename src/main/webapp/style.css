@@ -31,15 +31,8 @@ nav {
     border-bottom: 1px solid #ccc;
     padding: 12px 24px;
 }
-#who {
-    margin-left: auto;
-}
-section,
-#loginPanel {
+section {
     padding: 12px 24px;
-}
-#loginPanel {
-    max-width: 510px;
 }
 label {
     display: block;
@@ -224,14 +217,10 @@ form button {
         grid-template-columns: 1fr;
     }
     header,
-    section,
-    #loginPanel {
+    section {
         padding: 12px;
     }
     nav {
         padding: 12px;
-    }
-    #who {
-        margin-left: 0;
     }
 }

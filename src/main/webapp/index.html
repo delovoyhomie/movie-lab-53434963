@@ -4,34 +4,18 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <title>Каталог фильмов</title>
-        <link rel="stylesheet" href="style.css?v=20261103" />
+        <link rel="stylesheet" href="style.css?v=20261121" />
     </head>
     <body>
         <header>
             <h1>Каталог фильмов</h1>
             <span>Лабораторная работа · вариант 53434963</span>
         </header>
-        <div id="loginPanel">
-            <h2>Вход</h2>
-            <form id="loginForm">
-                <label>Логин<input name="login" required autocomplete="username" /></label
-                ><label
-                    >Пароль<input
-                        name="password"
-                        type="password"
-                        required
-                        autocomplete="current-password" /></label
-                ><button>Войти</button>
-                <p id="loginError" class="error" role="alert"></p>
-            </form>
-            <p>Учебные пользователи: student1 или student2, пароль student123.</p>
-        </div>
-        <div id="app" hidden>
+        <div id="app">
             <nav>
                 <button data-view="movies">Фильмы</button
                 ><button data-view="references">Справочники</button
-                ><button data-view="special">Специальные операции</button><span id="who"></span
-                ><button id="logout">Выйти</button>
+                ><button data-view="special">Специальные операции</button>
             </nav>
             <p id="status" role="status" hidden></p>
             <section id="moviesView">
@@ -153,6 +137,6 @@
             </div>
         </dialog>
         <script src="numeric-json.js"></script>
-        <script src="app.js?v=20261103-3"></script>
+        <script src="app.js?v=20261121-1"></script>
     </body>
 </html>

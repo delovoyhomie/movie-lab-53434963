@@ -9,14 +9,14 @@
 ]
 \node[package,text width=76mm] (web) at (41,5) {
   MovieResource, ReferenceResource\\
-  SpecialResource, AuthResource\\
-  AuthFilter, Errors, ApiApplication
+  SpecialResource, Errors\\
+  ApiApplication
 };
 \node[tab] at (web.north west) {\textbf{web}};
 \node[package,text width=76mm] (service) at (41,45) {
   MovieService, ReferenceService\\
   SpecialService, ValidationService\\
-  AuthService, AppException
+  AppException
 };
 \node[tab] at (service.north west) {\textbf{service}};
 \node[package,text width=70mm] (repository) at (0,94) {

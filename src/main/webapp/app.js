@@ -2,7 +2,6 @@
 
 const getElement = (id) => document.getElementById(id);
 const state = {
-    csrf: null,
     page: 0,
     size: 10,
     view: "movies",
@@ -75,14 +74,11 @@ async function api(path, method = "GET", body) {
     const headers = {
         "Content-Type": "application/json",
     };
-    if (state.csrf) {
-        headers["X-CSRF-Token"] = state.csrf;
-    }
     const response = await fetch("api/" + path, {
         method,
         headers,
         body: body === undefined ? undefined : encodeJson(body),
-        credentials: "same-origin",
+        cache: "no-store",
     });
     const data =
         response.status === 204
@@ -94,9 +90,6 @@ async function api(path, method = "GET", body) {
                       error: "Сервер вернул некорректный ответ",
                   }));
     if (!response.ok) {
-        if (response.status === 401 && path !== "auth/login") {
-            showLogin();
-        }
         const error = new Error(data?.error || "Ошибка " + response.status);
         error.status = response.status;
         throw error;
@@ -109,45 +102,13 @@ function showStatus(text) {
     getElement("status").hidden = !text;
 }
 
-function showLogin() {
-    state.csrf = null;
-    getElement("loginPanel").hidden = false;
-    getElement("app").hidden = true;
-    for (const detail of document.querySelectorAll("dialog")) {
-        detail.close();
-    }
-}
-
-async function showApplication(user) {
-    state.csrf = user.csrf;
-    getElement("who").textContent = user.login;
-    getElement("app").hidden = false;
-    getElement("loginPanel").hidden = true;
+async function loadApplication() {
     state.options = await api("references");
     state.revision = (await api("movies/revision")).revision;
     await refresh();
     showStatus("");
 }
 
-getElement("loginForm").onsubmit = async (event) => {
-    event.preventDefault();
-    try {
-        const data = Object.fromEntries(new FormData(event.target));
-        await showApplication(await api("auth/login", "POST", data));
-        getElement("loginError").textContent = "";
-        event.target.password.value = "";
-    } catch (error) {
-        getElement("loginError").textContent = error.message;
-    }
-};
-getElement("logout").onclick = async () => {
-    try {
-        await api("auth/logout", "POST", {});
-        showLogin();
-    } catch (error) {
-        showStatus(error.message);
-    }
-};
 fillOptions(getElement("filterColumn"), filterColumns);
 getElement("filterColumn").value = "name";
 fillOptions(getElement("sortColumn"), filterColumns);
@@ -767,7 +728,7 @@ getElement("specialForm").onsubmit = async (event) => {
     }
 };
 setInterval(async () => {
-    if (!state.csrf || state.busy) {
+    if (state.revision === null || state.busy) {
         return;
     }
     state.busy = true;
@@ -793,6 +754,4 @@ setInterval(async () => {
         state.busy = false;
     }
 }, 2000);
-api("auth/me")
-    .then(showApplication)
-    .catch(() => showLogin());
+loadApplication().catch((error) => showStatus(error.message));

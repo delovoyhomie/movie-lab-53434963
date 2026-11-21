@@ -3,7 +3,6 @@
 from smoke import Client
 
 a = Client()
-a.login("student1")
 options = a.call("references")
 assert options["coordinates"] and options["persons"], "Нужны справочные записи"
 for body in [

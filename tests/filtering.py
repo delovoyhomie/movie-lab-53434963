@@ -7,7 +7,6 @@ from urllib.parse import urlencode
 from smoke import Client
 
 client = Client()
-client.login("student1")
 prefix = "FILTER-" + uuid.uuid4().hex[:8]
 movies = []
 coordinate = person = None

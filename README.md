@@ -255,7 +255,6 @@ ssh -p 2222 -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -L 18081:12
 Адрес в браузере: http://127.0.0.1:18081/movie-lab/.
 Браузер обращается через SSH-туннель к приложению на Helios. Docker для этого не нужен.
 Если туннель уже открыт, второй раз эту команду выполнять не нужно.
-Вход в приложение: `student1` / `student123` или `student2` / `student123`.
 
 Если приложение остановлено, подключиться к Helios и запустить его
 (в другом терминале, отдельно от туннеля):
@@ -279,7 +278,6 @@ tail -f ~/movie-lab/console.log
 
 `start.sh` запускает приложение в фоне. Закрытие SSH не останавливает его.
 После перезагрузки Helios нужно снова выполнить `start.sh`.
-Исходники установленной сборки: `~/movie-lab/helios-source`.
 
 ### Запросы с Mac, без входа в терминал Helios
 
@@ -288,28 +286,28 @@ tail -f ~/movie-lab/console.log
 будет ждать без вывода — это нормально. Оставить его открытым, а `curl` выполнять
 в другом окне терминала на Mac.
 
-Сначала войти в приложение и сохранить сессию:
-
-```sh
-curl -i -c /tmp/movie-cookies.txt -H 'Content-Type: application/json' -d '{"login":"student1","password":"student123"}' http://127.0.0.1:18081/movie-lab/api/auth/login
-```
-
 Получить первые пять фильмов:
 
 ```sh
-curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:18081/movie-lab/api/movies?page=0&size=5'
+curl -i 'http://127.0.0.1:18081/movie-lab/api/movies?page=0&size=5'
 ```
 
 Сортировать фильмы по бюджету от большего к меньшему:
 
 ```sh
-curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:18081/movie-lab/api/movies?sort=budget&desc=true&size=5'
+curl -i 'http://127.0.0.1:18081/movie-lab/api/movies?sort=budget&desc=true&size=5'
 ```
 
 Найти фильмы с длительностью 137 минут:
 
 ```sh
-curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:18081/movie-lab/api/movies?column=length&q=137'
+curl -i 'http://127.0.0.1:18081/movie-lab/api/movies?column=length&q=137'
+```
+
+Добавить фильм (ID координат и режиссёра взять из `/api/references`):
+
+```sh
+curl -i -H 'Content-Type: application/json' -d '{"name":"Новый фильм","coordinatesId":1,"directorId":7,"budget":100,"totalBoxOffice":200,"mpaaRating":"PG","length":100,"genre":"ACTION"}' http://127.0.0.1:18081/movie-lab/api/movies
 ```
 
 ### Запросы, когда уже подключён по SSH к Helios
@@ -322,24 +320,20 @@ curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:18081/movie-lab/api/movies?c
 ssh -p 2222 s409946@helios.cs.ifmo.ru
 ```
 
-В терминале Helios войти в приложение, затем запросить список:
+В терминале Helios запросить список:
 
 ```sh
-curl -i -c /tmp/movie-cookies.txt -H 'Content-Type: application/json' -d '{"login":"student1","password":"student123"}' http://127.0.0.1:40946/movie-lab/api/auth/login
-curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:40946/movie-lab/api/movies?page=0&size=5'
+curl -i 'http://127.0.0.1:40946/movie-lab/api/movies?page=0&size=5'
 ```
 
 Пример фильтра и сортировки: фильмы жанра COMEDY, по бюджету от меньшего к большему.
 
 ```sh
-curl -i -b /tmp/movie-cookies.txt 'http://127.0.0.1:40946/movie-lab/api/movies?column=genre&q=COMEDY&sort=budget&desc=false'
+curl -i 'http://127.0.0.1:40946/movie-lab/api/movies?column=genre&q=COMEDY&sort=budget&desc=false'
 ```
 
-`-i` показывает HTTP-статус и заголовки, `-c` сохраняет сессию, `-b` передаёт её
-следующим запросам. Файл `/tmp/movie-cookies.txt` на Mac и на Helios — это два разных файла.
-Вход через SSH и вход в приложение — отдельные действия; сессия браузера тоже не передаётся в `curl`.
+`-i` показывает HTTP-статус и заголовки ответа.
 
-`401 Unauthorized` — нужно снова выполнить запрос входа в приложение.
 `Failed to connect` — проверить порт, туннель и запуск приложения.
 На Mac обращаться к `40946` не нужно: это порт приложения внутри Helios.
 
@@ -373,7 +367,6 @@ docker compose logs -f app
 После сообщения `Deployed "movie-lab.war"` открыть http://localhost:8080/movie-lab/.
 Выход из просмотра логов — `Ctrl+C`, приложение продолжит работать.
 
-Вход: `student1` или `student2`, пароль: `student123`.
 При первом запуске схема и тестовые данные загрузятся автоматически.
 
 Остановить приложение и БД (данные сохранятся):
@@ -384,7 +377,7 @@ docker compose down
 
 ## Данные и поиск
 
-`db/003_demo_data.sql` заполняет каталог 12 реальными фильмами и их авторами.
+`db/002_demo_data.sql` заполняет каталог 12 реальными фильмами и их авторами.
 Название на русском и год указаны в одном поле. Бюджет, мировые сборы, длительность,
 рейтинг и имена авторов взяты из The Numbers. Значения зафиксированы 03.11.2026;
 учитываются сведения о повторных прокатах, доступные в источнике.
@@ -444,7 +437,7 @@ docker compose down
 src/main/java/ru/itmo/movielab/
   model/        сущности БД и перечисления
   dto/          данные запросов
-  web/          REST API и авторизация
+  web/          REST API и обработка ошибок
   service/      логика операций и транзакции
   repository/   запросы к БД
   validation/   проверки числовых значений

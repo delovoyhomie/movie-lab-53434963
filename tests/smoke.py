@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Интеграционный тест запущенного сервера. Только отдельная тестовая база!
 python3 tests/smoke.py http://localhost:8080/movie-lab
-Использует двух демонстрационных пользователей; создаёт/удаляет тестовые данные.
+Использует двух клиентов; создаёт/удаляет тестовые данные.
 """
 
-import json, sys, urllib.request, urllib.error, http.cookiejar, uuid
+import json, sys, urllib.request, urllib.error, uuid
 
 BASE = (sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8080/movie-lab").rstrip(
     "/"
@@ -14,16 +14,11 @@ checks = 0
 
 class Client:
     def __init__(self):
-        self.opener = urllib.request.build_opener(
-            urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar())
-        )
-        self.token = None
+        self.opener = urllib.request.build_opener()
 
     def call(self, path, method="GET", body=None, expected=200):
         global checks
         headers = {"Content-Type": "application/json"}
-        if self.token:
-            headers["X-CSRF-Token"] = self.token
         req = urllib.request.Request(
             BASE + path,
             data=None if body is None else json.dumps(body).encode(),
@@ -45,22 +40,10 @@ class Client:
         checks += 1
         return value
 
-    def login(self, name):
-        self.token = self.call("auth/login", "POST", {"login": name, "password": "student123"})[
-            "csrf"
-        ]
-
 
 def main():
     a, b = Client(), Client()
-    a.call("movies", expected=401)
-    a.login("student1")
-    b.login("student2")
-    # Проверка CSRF
-    saved = a.token
-    a.token = "wrong"
-    a.call("movies", "POST", {}, 403)
-    a.token = saved
+    a.call("movies")
     a.call("references")
     for kind in ("persons", "locations", "coordinates"):
         a.call("references/" + kind)
@@ -179,12 +162,10 @@ def main():
         "DELETE",
         expected=204,
     )
-    a.call("auth/logout", "POST", {}, 204)
-    a.call("movies", expected=401)
     print(
         "PASS:",
         checks,
-        "HTTP-проверок; CRUD, валидация, конфликты, фильтры, функции, каскад, 2 сессии",
+        "HTTP-проверок; CRUD, валидация, конфликты, фильтры, функции, каскад, 2 клиента",
     )
 
 

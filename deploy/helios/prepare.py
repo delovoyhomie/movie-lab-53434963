@@ -11,7 +11,7 @@ if output == root or root in output.parents:
 if output.exists():
     raise SystemExit('Output directory must not exist')
 # Copy sources, never build artifacts or local credentials.
-shutil.copytree(root, output, ignore=shutil.ignore_patterns('.git', 'target', 'dist', '.env', '__pycache__'))
+shutil.copytree(root, output, ignore=shutil.ignore_patterns('.git', 'target', 'dist', '.env', '__pycache__', '._*', '.DS_Store'))
 schema = (root / 'db/001_schema.sql').read_text()
 names = re.findall(r'CREATE\s+(?:TABLE|FUNCTION|INDEX|TRIGGER)\s+(\w+)', schema, re.I)
 names = {name: 'ml53434963_' + name for name in names}
@@ -27,6 +27,4 @@ for path in (output / 'src/main/java').rglob('*.java'):
     text = re.sub(r'(@Table\(name = ")([^"]+)(")', lambda m: m[1] + replace(m[2]) + m[3], text)
     text = re.sub(r'(createNativeQuery\(")([^"]+)(")', lambda m: m[1] + replace(m[2]) + m[3], text)
     path.write_text(text)
-path = output / 'tests/create_user.py'
-path.write_text(replace(path.read_text()))
 print(output)
